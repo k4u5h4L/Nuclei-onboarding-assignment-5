@@ -28,15 +28,15 @@ public class SubscriptionController {
   }
 
   @RequestMapping(path = "/subscribed", method = RequestMethod.GET)
-  public List<Subscription> getSubscribedSubscriptions(HttpServletRequest request) {
+  public List<SubscribedUser> getSubscribedUserSubscriptions(HttpServletRequest request) {
     final String authHeader = request.getHeader("Authorization");
 
     return subscriptionService.getSubscribedSubscriptions(authHeader);
   }
 
   @RequestMapping(path = "/subscribe/{subscriptionId}", method = RequestMethod.GET)
-  public SubscribedUser subscribeUser(HttpServletRequest request,
-                                      @PathVariable Long subscriptionId) {
+  public SubscribedUser subscribeUserToSubscription(HttpServletRequest request,
+                                                    @PathVariable Long subscriptionId) {
 
     final String authHeader = request.getHeader("Authorization");
 
@@ -44,12 +44,21 @@ public class SubscriptionController {
   }
 
   @RequestMapping(path = "/cancel/{subscriptionId}", method = RequestMethod.GET)
-  public SubscribedUser unsubscribeUser(HttpServletRequest request,
-                                        @PathVariable Long subscriptionId) {
+  public SubscribedUser unsubscribeUserFromSubscription(HttpServletRequest request,
+                                                        @PathVariable Long subscriptionId) {
 
     final String authHeader = request.getHeader("Authorization");
 
     return subscriptionService.unsubscribeUserFromSubscription(subscriptionId, authHeader);
+  }
+
+  @RequestMapping(path = "/renew/{subscriptionId}", method = RequestMethod.GET)
+  public SubscribedUser renewUserSubscription(HttpServletRequest request,
+                                              @PathVariable Long subscriptionId) {
+
+    final String authHeader = request.getHeader("Authorization");
+
+    return subscriptionService.renewUserSubscription(subscriptionId, authHeader);
   }
 
 }

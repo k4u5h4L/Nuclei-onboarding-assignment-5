@@ -30,6 +30,7 @@ public class AppUser {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @JsonIgnore
   private Long id;
 
   @Column(unique = true)

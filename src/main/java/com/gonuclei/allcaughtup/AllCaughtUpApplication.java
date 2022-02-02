@@ -35,7 +35,8 @@ public class AllCaughtUpApplication {
                                   AppUserRepository appUserRepository,
                                   SubscribedUserRepository subscribedUserRepository) {
     return (args) -> {
-      DatabaseSeedUtil.seedSubs(subscriptionRepository);
+      DatabaseSeedUtil.seedAll(subscriptionRepository, appUserRepository, subscribedUserRepository,
+          bcryptEncoder);
     };
   }
 }

@@ -24,20 +24,29 @@ public class DatabaseSeedUtil {
                              PasswordEncoder bcryptEncoder) {
     Subscription netflix = new Subscription(200.00, Period.of(0, 2, 0), "Netflix",
         "A movie " + "streaming service billed every 2 months");
-    subscriptionRepository.save(netflix);
-
     Subscription prime = new Subscription(300.00, Period.of(1, 0, 0), "Amazon Prime",
         "A " + "movie streaming service billed every year");
+    Subscription disney = new Subscription(250.00, Period.of(0, 1, 0), "Disney +",
+        "A movie streaming service billed every month");
+    if (subscriptionRepository.count() == 0) {
+      subscriptionRepository.save(netflix);
 
-    subscriptionRepository.save(prime);
+      subscriptionRepository.save(prime);
 
-    subscriptionRepository.save(new Subscription(250.00, Period.of(0, 1, 0), "Disney +",
-        "A movie streaming service billed every month"));
+      subscriptionRepository.save(disney);
+    } else {
+      log.info("Subscriptions already seeded");
+    }
 
-    appUserRepository.save(new AppUser("admin", bcryptEncoder.encode("admin-password")));
+    AppUser user1 = new AppUser("kaushal.bhat@gonuclei.com", bcryptEncoder.encode("password"));
+    AppUser user2 = new AppUser("devkauhere@gmail.com", bcryptEncoder.encode("password"));
 
-    AppUser user1 = new AppUser("user1", bcryptEncoder.encode("test123"));
-    appUserRepository.save(user1);
+    if (appUserRepository.count() == 0) {
+      appUserRepository.save(user1);
+      appUserRepository.save(user2);
+    } else {
+      log.info("AppUsers already seeded");
+    }
 
     SubscribedUser sc1 = new SubscribedUser(user1, netflix, LocalDate.now(),
         LocalDate.now().plus(netflix.getTimePeriod()));
@@ -45,10 +54,14 @@ public class DatabaseSeedUtil {
     SubscribedUser sc2 = new SubscribedUser(user1, prime, LocalDate.now(),
         LocalDate.now().plus(prime.getTimePeriod()));
 
-    subscribedUserRepository.save(sc1);
-    subscribedUserRepository.save(sc2);
+    if (subscribedUserRepository.count() == 0) {
+      subscribedUserRepository.save(sc1);
+      subscribedUserRepository.save(sc2);
+    } else {
+      log.info("SubscribedUsers already seeded");
+    }
 
-    log.info("All items in database seeded");
+    log.info("All items in database seeding finished");
   }
 
   public static void seedSubs(SubscriptionRepository subscriptionRepository) {

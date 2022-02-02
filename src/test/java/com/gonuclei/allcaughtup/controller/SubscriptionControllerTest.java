@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -78,6 +79,7 @@ class SubscriptionControllerTest {
 
   @Test
   @DisplayName("User is able to get different subscriptions to choose from")
+  @Order(1)
   void shouldReturnDifferentSubscriptions() {
     String uri = "/api/subscription/all";
 
@@ -99,7 +101,8 @@ class SubscriptionControllerTest {
 
   @Test
   @DisplayName("User is able to subscribe to a subscription")
-  void shouldSubscribeuserToThatSubscription() {
+  @Order(2)
+  void shouldSubscribeUserToThatSubscription() {
     Subscription subscription = subscriptionRepository.findAll().iterator().next();
     String uri = "/api/subscription/subscribe/" + subscription.getId();
 
@@ -121,6 +124,7 @@ class SubscriptionControllerTest {
 
   @Test
   @DisplayName("User is able to cancel a current subscription")
+  @Order(5)
   void shouldCancelCurrentSubscription() {
     Subscription subscription = subscriptionRepository.findAll().iterator().next();
 
@@ -156,6 +160,7 @@ class SubscriptionControllerTest {
 
   @Test
   @DisplayName("User is able to get subscriptions already subscribed")
+  @Order(3)
   void shouldReturnDifferentSubscribedSubscriptions() {
     Subscription subscription = subscriptionRepository.findAll().iterator().next();
 
@@ -172,6 +177,43 @@ class SubscriptionControllerTest {
     }
 
     String uri = "/api/subscription/subscribed";
+
+    webTestClient
+        // make a get request
+        .get().uri(uri)
+        // accept the content type application-json
+        .accept(MediaType.APPLICATION_JSON)
+        // set auth headers
+        .header("Authorization", jwtTokenHeader)
+        // execute the request
+        .exchange()
+        // expect the status to be OK
+        .expectStatus().isOk()
+        // expect the body to not be empty
+        .expectBody()
+        .consumeWith(response -> Assertions.assertThat(response.getResponseBody()).isNotNull());
+  }
+
+  @Test
+  @DisplayName("User is able to renew subscriptions already subscribed")
+  @Order(4)
+  void shouldRenewSubscribedSubscriptions() {
+    Subscription subscription = subscriptionRepository.findAll().iterator().next();
+
+    String email = jwtTokenUtil.getUsernameFromToken(jwtTokenHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser appUser = appUserRepository.findByEmail(email).get();
+
+    if (subscribedUserRepository.findByUserIdAndSubscriptionId(appUser.getId(),
+        subscription.getId()).isEmpty()) {
+      subscriptionService.subscribeUserToSubscription(subscription.getId(), jwtTokenHeader);
+    }
+
+    String uri = "/api/subscription/renew/" + subscription.getId();
 
     webTestClient
         // make a get request

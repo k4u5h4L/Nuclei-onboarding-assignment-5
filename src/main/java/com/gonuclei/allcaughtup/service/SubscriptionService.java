@@ -43,8 +43,7 @@ public class SubscriptionService {
     return result;
   }
 
-  @Cacheable(value = "itemCache")
-  public List<Subscription> getSubscribedSubscriptions(String authHeader) {
+  public List<SubscribedUser> getSubscribedSubscriptions(String authHeader) {
     log.info("Returning list of subscriptions subscribed by user from DB");
 
     String email = jwtTokenUtil.getUsernameFromToken(authHeader.substring(7));
@@ -55,12 +54,10 @@ public class SubscriptionService {
 
     AppUser user = appUserRepository.findByEmail(email).get();
 
-    ArrayList<Subscription> result = new ArrayList<>();
+    ArrayList<SubscribedUser> result = new ArrayList<>();
 
     if (subscribedUserRepository.findAllByUserId(user.getId()).isPresent()) {
-      subscribedUserRepository.findAllByUserId(user.getId()).get().forEach(sc -> {
-        result.add(sc.getSubscription());
-      });
+      result.addAll(subscribedUserRepository.findAllByUserId(user.getId()).get());
     }
 
     return result;
@@ -120,5 +117,35 @@ public class SubscriptionService {
     subscribedUserRepository.delete(su);
 
     return su;
+  }
+
+  public SubscribedUser renewUserSubscription(Long subscriptionId, String authHeader) {
+    if (subscriptionRepository.findById(subscriptionId).isEmpty()) {
+      throw new SubscriptionDoesNotExistException(Constants.SUBSCRIPTION_NOT_FOUND_MESSAGE);
+    }
+
+    Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
+
+    String email = jwtTokenUtil.getUsernameFromToken(authHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser user = appUserRepository.findByEmail(email).get();
+
+    if (subscribedUserRepository.findByUserIdAndSubscriptionId(user.getId(), subscriptionId)
+        .isEmpty()) {
+      throw new SubscriptionDoesNotExistException(Constants.USER_IS_NOT_SUBSCRIBED_MESSAGE);
+    }
+
+    log.info("Renewing the user's subscription");
+
+    SubscribedUser subscribedUser =
+        subscribedUserRepository.findByUserIdAndSubscriptionId(user.getId(), subscriptionId).get();
+
+    subscribedUser.setEndDate(subscribedUser.getEndDate().plus(subscription.getTimePeriod()));
+
+    return subscribedUserRepository.save(subscribedUser);
   }
 }

@@ -29,6 +29,7 @@ public class SubscribedUser {
 
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   @ManyToOne(fetch = FetchType.EAGER, optional = false)
+  @JsonIgnore
   private AppUser user;
 
   @JoinColumn(name = "subscription_id", referencedColumnName = "id")
