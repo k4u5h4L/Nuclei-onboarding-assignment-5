@@ -8,6 +8,7 @@ build/
 # custom files
 **/application-dev.properties
 *.DS_Store
+nodes/
 
 ### STS ###
 .apt_generated
