@@ -40,13 +40,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final HttpSecurity httpSecurity) throws Exception {
-//    http.csrf().disable().authorizeRequests().antMatchers("/api/subscription").permitAll()
-//        .anyRequest().authenticated().and().formLogin();
 
     httpSecurity.csrf().disable()
         // dont authenticate this particular request
         .authorizeRequests().antMatchers("/auth/**").permitAll().
-//        .authorizeRequests().antMatchers("/api/**", "/auth/**").permitAll().
         // all other requests need to be authenticated
             anyRequest().authenticated().and().
         // make sure we use stateless session; session won't be used to

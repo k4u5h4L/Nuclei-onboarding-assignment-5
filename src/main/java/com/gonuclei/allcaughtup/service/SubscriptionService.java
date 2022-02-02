@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,8 +33,9 @@ public class SubscriptionService {
 
   private final JwtTokenUtil jwtTokenUtil;
 
+  @Cacheable(value = "itemCache")
   public List<Subscription> getAllSubscriptions() {
-    log.info("returning list of subs");
+    log.info("Returning list of subs from DB");
 
     ArrayList<Subscription> result = new ArrayList<>();
     subscriptionRepository.findAll().forEach(result::add);
@@ -60,6 +62,8 @@ public class SubscriptionService {
         .isPresent()) {
       throw new SubscriptionAlreadyExistsException(Constants.SUBSCRIPTION_ALREADY_EXISTS_MESSAGE);
     }
+
+    log.info("Saving the subscription to the DB");
 
     return subscribedUserRepository.save(new SubscribedUser(user, subscription, LocalDate.now(),
         LocalDate.now().plus(subscription.getTimePeriod())));

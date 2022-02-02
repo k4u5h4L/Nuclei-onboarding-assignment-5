@@ -38,19 +38,25 @@ class SubscriptionControllerTest {
   @Autowired
   private AuthenticationService authenticationService;
 
-  private String jwtTokenHeader;
+  private String jwtTokenHeader = "";
   private UserDto user;
 
   @BeforeEach
   void setUp() throws Exception {
     user = new UserDto("subscriptionuser@mail.com", "password");
 
-    DatabaseSeedUtil.seedSubs(subscriptionRepository);
+    if (subscriptionRepository.count() == 0) {
+      DatabaseSeedUtil.seedSubs(subscriptionRepository);
+    }
 
     if (appUserRepository.findByEmail(user.getEmail()).isEmpty()) {
       userDetailsService.save(user);
     }
-    jwtTokenHeader = "Bearer " + authenticationService.signIn(user.getEmail(), user.getPassword());
+
+    if (jwtTokenHeader.isBlank() || !jwtTokenHeader.startsWith("Bearer ")) {
+      jwtTokenHeader =
+          "Bearer " + authenticationService.signIn(user.getEmail(), user.getPassword());
+    }
   }
 
   @Test

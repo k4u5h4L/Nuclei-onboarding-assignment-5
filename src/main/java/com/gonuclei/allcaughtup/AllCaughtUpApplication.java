@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
+@EnableCaching
 public class AllCaughtUpApplication {
 
   @Autowired
@@ -36,6 +38,8 @@ public class AllCaughtUpApplication {
 //      DatabaseSeedUtil.seedAll(subscriptionRepository, appUserRepository,
 //      subscribedUserRepository,
 //          bcryptEncoder);
+
+      DatabaseSeedUtil.seedSubs(subscriptionRepository);
 
 //      List<SubscribedUser> sc;
 //      if (subscribedUserRepository.findAllBySubscriptionId(1L).isPresent()) {
