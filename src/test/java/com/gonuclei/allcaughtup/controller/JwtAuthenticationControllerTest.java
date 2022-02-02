@@ -74,7 +74,7 @@ class JwtAuthenticationControllerTest {
   @Test
   @DisplayName("User is created successfully")
   void shouldNotAllowWithoutLogin() {
-    String uri = "/api/subscription/all";
+    String uri = "/api/subscription/subscribe/1";
 
     webTestClient
         // make a get request to the uri

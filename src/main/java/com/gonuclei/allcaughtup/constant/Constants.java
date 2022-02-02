@@ -11,4 +11,7 @@ public class Constants {
       "Subscription with that ID does not exists";
   final public static String SUBSCRIPTION_ALREADY_EXISTS_MESSAGE =
       "You seem to have already subscribed to this subscription";
+
+  final public static String USER_IS_NOT_SUBSCRIBED_MESSAGE =
+      "You don't seem to be subscribed to this subscription";
 }

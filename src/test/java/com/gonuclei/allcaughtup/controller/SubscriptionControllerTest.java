@@ -10,13 +10,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import com.gonuclei.allcaughtup.constant.Constants;
+import com.gonuclei.allcaughtup.exception.AuthenticationFailureException;
+import com.gonuclei.allcaughtup.model.AppUser;
+import com.gonuclei.allcaughtup.model.SubscribedUser;
 import com.gonuclei.allcaughtup.model.Subscription;
 import com.gonuclei.allcaughtup.model.UserDto;
 import com.gonuclei.allcaughtup.repository.AppUserRepository;
+import com.gonuclei.allcaughtup.repository.SubscribedUserRepository;
 import com.gonuclei.allcaughtup.repository.SubscriptionRepository;
 import com.gonuclei.allcaughtup.service.AuthenticationService;
 import com.gonuclei.allcaughtup.service.JwtUserDetailsService;
+import com.gonuclei.allcaughtup.service.SubscriptionService;
 import com.gonuclei.allcaughtup.util.DatabaseSeedUtil;
+import com.gonuclei.allcaughtup.util.JwtTokenUtil;
 
 import reactor.core.publisher.Mono;
 
@@ -33,29 +40,39 @@ class SubscriptionControllerTest {
   private SubscriptionRepository subscriptionRepository;
 
   @Autowired
+  private SubscribedUserRepository subscribedUserRepository;
+
+  @Autowired
   private JwtUserDetailsService userDetailsService;
+
+  @Autowired
+  private JwtTokenUtil jwtTokenUtil;
+
+  @Autowired
+  private SubscriptionService subscriptionService;
 
   @Autowired
   private AuthenticationService authenticationService;
 
   private String jwtTokenHeader = "";
-  private UserDto user;
+  private UserDto userDto;
+  private AppUser user;
 
   @BeforeEach
   void setUp() throws Exception {
-    user = new UserDto("subscriptionuser@mail.com", "password");
+    userDto = new UserDto("subscriptionuser@mail.com", "password");
 
     if (subscriptionRepository.count() == 0) {
       DatabaseSeedUtil.seedSubs(subscriptionRepository);
     }
 
-    if (appUserRepository.findByEmail(user.getEmail()).isEmpty()) {
-      userDetailsService.save(user);
+    if (appUserRepository.findByEmail(userDto.getEmail()).isEmpty()) {
+      user = userDetailsService.save(userDto);
     }
 
     if (jwtTokenHeader.isBlank() || !jwtTokenHeader.startsWith("Bearer ")) {
       jwtTokenHeader =
-          "Bearer " + authenticationService.signIn(user.getEmail(), user.getPassword());
+          "Bearer " + authenticationService.signIn(userDto.getEmail(), userDto.getPassword());
     }
   }
 
@@ -85,6 +102,76 @@ class SubscriptionControllerTest {
   void shouldSubscribeuserToThatSubscription() {
     Subscription subscription = subscriptionRepository.findAll().iterator().next();
     String uri = "/api/subscription/subscribe/" + subscription.getId();
+
+    webTestClient
+        // make a get request
+        .get().uri(uri)
+        // accept the content type application-json
+        .accept(MediaType.APPLICATION_JSON)
+        // set auth headers
+        .header("Authorization", jwtTokenHeader)
+        // execute the request
+        .exchange()
+        // expect the status to be OK
+        .expectStatus().isOk()
+        // expect the body to not be empty
+        .expectBody()
+        .consumeWith(response -> Assertions.assertThat(response.getResponseBody()).isNotNull());
+  }
+
+  @Test
+  @DisplayName("User is able to cancel a current subscription")
+  void shouldCancelCurrentSubscription() {
+    Subscription subscription = subscriptionRepository.findAll().iterator().next();
+
+    String email = jwtTokenUtil.getUsernameFromToken(jwtTokenHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser appUser = appUserRepository.findByEmail(email).get();
+
+    if (subscribedUserRepository.findAllByUserId(appUser.getId()).isEmpty()) {
+      subscriptionService.subscribeUserToSubscription(subscription.getId(), jwtTokenHeader);
+    }
+
+    String uri = "/api/subscription/cancel/" + subscription.getId();
+
+    webTestClient
+        // make a get request
+        .get().uri(uri)
+        // accept the content type application-json
+        .accept(MediaType.APPLICATION_JSON)
+        // set auth headers
+        .header("Authorization", jwtTokenHeader)
+        // execute the request
+        .exchange()
+        // expect the status to be OK
+        .expectStatus().isOk()
+        // expect the body to not be empty
+        .expectBody()
+        .consumeWith(response -> Assertions.assertThat(response.getResponseBody()).isNotNull());
+  }
+
+  @Test
+  @DisplayName("User is able to get subscriptions already subscribed")
+  void shouldReturnDifferentSubscribedSubscriptions() {
+    Subscription subscription = subscriptionRepository.findAll().iterator().next();
+
+    String email = jwtTokenUtil.getUsernameFromToken(jwtTokenHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser appUser = appUserRepository.findByEmail(email).get();
+
+    if (subscribedUserRepository.findAllByUserId(appUser.getId()).isEmpty()) {
+      subscriptionService.subscribeUserToSubscription(subscription.getId(), jwtTokenHeader);
+    }
+
+    String uri = "/api/subscription/subscribed";
 
     webTestClient
         // make a get request

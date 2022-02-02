@@ -1,5 +1,7 @@
 package com.gonuclei.allcaughtup.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +24,7 @@ public class SubscribedUser {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @JsonIgnore
   private Long id;
 
   @JoinColumn(name = "user_id", referencedColumnName = "id")

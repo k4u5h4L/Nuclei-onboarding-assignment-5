@@ -35,20 +35,7 @@ public class AllCaughtUpApplication {
                                   AppUserRepository appUserRepository,
                                   SubscribedUserRepository subscribedUserRepository) {
     return (args) -> {
-//      DatabaseSeedUtil.seedAll(subscriptionRepository, appUserRepository,
-//      subscribedUserRepository,
-//          bcryptEncoder);
-
       DatabaseSeedUtil.seedSubs(subscriptionRepository);
-
-//      List<SubscribedUser> sc;
-//      if (subscribedUserRepository.findAllBySubscriptionId(1L).isPresent()) {
-//        sc = subscribedUserRepository.findAllBySubscriptionId(1L).get();
-//      } else {
-//        throw new UsernameNotFoundException("User is not found");
-//      }
-
-//      System.out.println(sc);
     };
   }
 }

@@ -52,18 +52,22 @@ public class DatabaseSeedUtil {
   }
 
   public static void seedSubs(SubscriptionRepository subscriptionRepository) {
-    Subscription netflix = new Subscription(200.00, Period.of(0, 2, 0), "Netflix",
-        "A movie " + "streaming service billed every 2 months");
-    subscriptionRepository.save(netflix);
+    if (subscriptionRepository.count() == 0) {
+      Subscription netflix = new Subscription(200.00, Period.of(0, 2, 0), "Netflix",
+          "A movie " + "streaming service billed every 2 months");
+      subscriptionRepository.save(netflix);
 
-    Subscription prime = new Subscription(300.00, Period.of(1, 0, 0), "Amazon Prime",
-        "A " + "movie streaming service billed every year");
+      Subscription prime = new Subscription(300.00, Period.of(1, 0, 0), "Amazon Prime",
+          "A " + "movie streaming service billed every year");
 
-    subscriptionRepository.save(prime);
+      subscriptionRepository.save(prime);
 
-    subscriptionRepository.save(new Subscription(250.00, Period.of(0, 1, 0), "Disney +",
-        "A movie streaming service billed every month"));
+      subscriptionRepository.save(new Subscription(250.00, Period.of(0, 1, 0), "Disney +",
+          "A movie streaming service billed every month"));
 
-    log.info("Subscriptions seeded");
+      log.info("Subscriptions seeded");
+    } else {
+      log.info("Subscriptions already seeded");
+    }
   }
 }

@@ -35,10 +35,33 @@ public class SubscriptionService {
 
   @Cacheable(value = "itemCache")
   public List<Subscription> getAllSubscriptions() {
-    log.info("Returning list of subs from DB");
+    log.info("Returning list of subscriptions from DB");
 
     ArrayList<Subscription> result = new ArrayList<>();
     subscriptionRepository.findAll().forEach(result::add);
+
+    return result;
+  }
+
+  @Cacheable(value = "itemCache")
+  public List<Subscription> getSubscribedSubscriptions(String authHeader) {
+    log.info("Returning list of subscriptions subscribed by user from DB");
+
+    String email = jwtTokenUtil.getUsernameFromToken(authHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser user = appUserRepository.findByEmail(email).get();
+
+    ArrayList<Subscription> result = new ArrayList<>();
+
+    if (subscribedUserRepository.findAllByUserId(user.getId()).isPresent()) {
+      subscribedUserRepository.findAllByUserId(user.getId()).get().forEach(sc -> {
+        result.add(sc.getSubscription());
+      });
+    }
 
     return result;
   }
@@ -63,9 +86,39 @@ public class SubscriptionService {
       throw new SubscriptionAlreadyExistsException(Constants.SUBSCRIPTION_ALREADY_EXISTS_MESSAGE);
     }
 
-    log.info("Saving the subscription to the DB");
+    log.info("Subscribing the user to the subscription");
 
     return subscribedUserRepository.save(new SubscribedUser(user, subscription, LocalDate.now(),
         LocalDate.now().plus(subscription.getTimePeriod())));
+  }
+
+  public SubscribedUser unsubscribeUserFromSubscription(Long subscriptionId, String authHeader) {
+    if (subscriptionRepository.findById(subscriptionId).isEmpty()) {
+      throw new SubscriptionDoesNotExistException(Constants.SUBSCRIPTION_NOT_FOUND_MESSAGE);
+    }
+
+    Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
+
+    String email = jwtTokenUtil.getUsernameFromToken(authHeader.substring(7));
+
+    if (appUserRepository.findByEmail(email).isEmpty()) {
+      throw new AuthenticationFailureException(Constants.USER_NOT_FOUND_MESSAGE);
+    }
+
+    AppUser user = appUserRepository.findByEmail(email).get();
+
+    if (subscribedUserRepository.findByUserIdAndSubscriptionId(user.getId(), subscriptionId)
+        .isEmpty()) {
+      throw new SubscriptionDoesNotExistException(Constants.USER_IS_NOT_SUBSCRIBED_MESSAGE);
+    }
+
+    log.info("Unsubscribing the user from the subscription");
+
+    SubscribedUser su =
+        subscribedUserRepository.findByUserIdAndSubscriptionId(user.getId(), subscriptionId).get();
+
+    subscribedUserRepository.delete(su);
+
+    return su;
   }
 }

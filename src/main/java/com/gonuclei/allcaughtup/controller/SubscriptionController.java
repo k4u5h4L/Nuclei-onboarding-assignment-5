@@ -23,8 +23,15 @@ public class SubscriptionController {
   private final SubscriptionService subscriptionService;
 
   @RequestMapping(path = "/all", method = RequestMethod.GET)
-  public List<Subscription> getSubscriptions() {
+  public List<Subscription> getAllSubscriptions() {
     return subscriptionService.getAllSubscriptions();
+  }
+
+  @RequestMapping(path = "/subscribed", method = RequestMethod.GET)
+  public List<Subscription> getSubscribedSubscriptions(HttpServletRequest request) {
+    final String authHeader = request.getHeader("Authorization");
+
+    return subscriptionService.getSubscribedSubscriptions(authHeader);
   }
 
   @RequestMapping(path = "/subscribe/{subscriptionId}", method = RequestMethod.GET)
@@ -34,6 +41,15 @@ public class SubscriptionController {
     final String authHeader = request.getHeader("Authorization");
 
     return subscriptionService.subscribeUserToSubscription(subscriptionId, authHeader);
+  }
+
+  @RequestMapping(path = "/cancel/{subscriptionId}", method = RequestMethod.GET)
+  public SubscribedUser unsubscribeUser(HttpServletRequest request,
+                                        @PathVariable Long subscriptionId) {
+
+    final String authHeader = request.getHeader("Authorization");
+
+    return subscriptionService.unsubscribeUserFromSubscription(subscriptionId, authHeader);
   }
 
 }
