@@ -1,5 +1,7 @@
 package com.gonuclei.allcaughtup.util;
 
+import com.gonuclei.allcaughtup.constant.Constants;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,12 +16,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+/**
+ * Util class which contains userful functions to be performed with JWTs
+ */
 @Component
 public class JwtTokenUtil implements Serializable {
 
   private static final long serialVersionUID = -2550185165626007488L;
 
-  public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+  public static final long JWT_TOKEN_VALIDITY = Constants.JWT_VALIDITY;
 
   @Value("${jwt.secret}")
   private String secret;

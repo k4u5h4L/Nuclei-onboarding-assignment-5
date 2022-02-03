@@ -21,7 +21,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-
+/**
+ * Subscription model which contains all the subscriptions available
+ */
 @Entity
 @Data
 @NoArgsConstructor

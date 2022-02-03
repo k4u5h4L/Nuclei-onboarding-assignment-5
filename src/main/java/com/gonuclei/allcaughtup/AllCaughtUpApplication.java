@@ -26,6 +26,11 @@ public class AllCaughtUpApplication {
   @Autowired
   private PasswordEncoder bcryptEncoder;
 
+  /**
+   * Starting point of the application
+   *
+   * @param args command line arguements
+   */
   public static void main(String[] args) {
     SpringApplication.run(AllCaughtUpApplication.class, args);
   }

@@ -14,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service to help with Authentication
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -25,7 +28,15 @@ public class AuthenticationService {
 
   private JwtUserDetailsService userDetailsService;
 
-  public String signIn(String email, String password) throws Exception {
+  /**
+   * Function to sign the user in
+   *
+   * @param email    Email of the user
+   * @param password Password of the user
+   * @return JWT token if successful authentication occurs
+   * @throws AuthenticationFailureException Exception thrown when authentication fails
+   */
+  public String signIn(String email, String password) throws AuthenticationFailureException {
     authenticate(email, password);
 
     final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -33,6 +44,13 @@ public class AuthenticationService {
     return jwtTokenUtil.generateToken(userDetails);
   }
 
+  /**
+   * A helper function which helps to authenticate user
+   *
+   * @param email    Email of the user
+   * @param password Password of the user
+   * @throws AuthenticationFailureException Exception thrown when authentication fails
+   */
   private void authenticate(String email, String password) throws AuthenticationFailureException {
     try {
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));

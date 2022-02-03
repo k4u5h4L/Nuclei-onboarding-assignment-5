@@ -1,5 +1,6 @@
 package com.gonuclei.allcaughtup.security;
 
+import com.gonuclei.allcaughtup.constant.Constants;
 import com.gonuclei.allcaughtup.service.JwtUserDetailsService;
 import com.gonuclei.allcaughtup.util.JwtTokenUtil;
 
@@ -21,7 +22,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.jsonwebtoken.ExpiredJwtException;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Jwt Authentication middleware which intercepts the request to see if request is authenticated
+ * or not
+ */
 @Component
+@Slf4j
 public class JwtRequestFilter extends OncePerRequestFilter {
 
   @Autowired
@@ -44,12 +52,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       try {
         username = jwtTokenUtil.getUsernameFromToken(jwtToken);
       } catch (IllegalArgumentException e) {
-        System.out.println("Unable to get JWT Token");
+        log.error(Constants.UNABLE_TO_GET_JWT_MESSAGE);
       } catch (ExpiredJwtException e) {
-        System.out.println("JWT Token has expired");
+        log.error(Constants.JWT_TOKEN_EXPIRED_MESSAGE);
       }
     } else {
-      logger.warn("JWT Token does not begin with Bearer String");
+      log.warn(Constants.JWT_DOES_NOT_BEGIN_WITH_MESSAGE);
     }
 
     //Once we get the token validate it.

@@ -14,10 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Util class which helps seed the database with initial values if database is empty
+ */
 @Slf4j
 public class DatabaseSeedUtil {
 
 
+  /**
+   * Seeds all the tables in the database with initial values if not present
+   *
+   * @param subscriptionRepository   SubscriptionRepository repository to insert values
+   * @param appUserRepository        AppUserRepository repository to insert values
+   * @param subscribedUserRepository SubscribedUserRepository repository to insert values
+   * @param bcryptEncoder            The encoder to use to hash the passwords
+   */
   public static void seedAll(SubscriptionRepository subscriptionRepository,
                              AppUserRepository appUserRepository,
                              SubscribedUserRepository subscribedUserRepository,
@@ -64,6 +75,11 @@ public class DatabaseSeedUtil {
     log.info("All items in database seeding finished");
   }
 
+  /**
+   * Seeds only the subscriptions table in the database
+   *
+   * @param subscriptionRepository SubscriptionRepository repository to insert values
+   */
   public static void seedSubs(SubscriptionRepository subscriptionRepository) {
     if (subscriptionRepository.count() == 0) {
       Subscription netflix = new Subscription(200.00, Period.of(0, 2, 0), "Netflix",

@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
+/**
+ * JwtRequest model which is used to get username and password from request
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

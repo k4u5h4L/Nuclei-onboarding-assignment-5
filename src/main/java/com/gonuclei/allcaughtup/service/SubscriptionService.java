@@ -33,6 +33,12 @@ public class SubscriptionService {
 
   private final JwtTokenUtil jwtTokenUtil;
 
+  /**
+   * Function which handles returning all the subscriptions in the database. Also caches the
+   * response for future requests
+   *
+   * @return List of subscriptions in the database
+   */
   @Cacheable(value = "itemCache")
   public List<Subscription> getAllSubscriptions() {
     log.info("Returning list of subscriptions from DB");
@@ -43,6 +49,12 @@ public class SubscriptionService {
     return result;
   }
 
+  /**
+   * Function to handle response of all the subscriptions which the user is currently subscribed to
+   *
+   * @param authHeader The Header with the JWT token in it
+   * @return List of subscriptions which start and end date
+   */
   public List<SubscribedUser> getSubscribedSubscriptions(String authHeader) {
     log.info("Returning list of subscriptions subscribed by user from DB");
 
@@ -63,6 +75,14 @@ public class SubscriptionService {
     return result;
   }
 
+  /**
+   * Function to handle the subscribe event, i.e. when the user wants to subscribe to a
+   * particular subscription
+   *
+   * @param subscriptionId The ID of the subscription user wants to subscribe to
+   * @param authHeader     The Header with the JWT token in it
+   * @return The subscription which has start and end date
+   */
   public SubscribedUser subscribeUserToSubscription(Long subscriptionId, String authHeader) {
     if (subscriptionRepository.findById(subscriptionId).isEmpty()) {
       throw new SubscriptionDoesNotExistException(Constants.SUBSCRIPTION_NOT_FOUND_MESSAGE);
@@ -89,6 +109,14 @@ public class SubscriptionService {
         LocalDate.now().plus(subscription.getTimePeriod())));
   }
 
+  /**
+   * Function to handle the unsubscribe event, i.e. when the user wants to unsubscribe from a
+   * particular subscription
+   *
+   * @param subscriptionId ID of the subscription he/she wants to unsubscribe from
+   * @param authHeader     The Header with the JWT token in it
+   * @return The unsubscribed subscription which has start and end date
+   */
   public SubscribedUser unsubscribeUserFromSubscription(Long subscriptionId, String authHeader) {
     if (subscriptionRepository.findById(subscriptionId).isEmpty()) {
       throw new SubscriptionDoesNotExistException(Constants.SUBSCRIPTION_NOT_FOUND_MESSAGE);
@@ -119,6 +147,14 @@ public class SubscriptionService {
     return su;
   }
 
+  /**
+   * Function to handle the renew event, i.e. when the user wants to renew his/her current
+   * subscription
+   *
+   * @param subscriptionId ID of the subscription he/she wants to renew
+   * @param authHeader     The Header with the JWT token in it
+   * @return The renewed subscription which has start and a new end date
+   */
   public SubscribedUser renewUserSubscription(Long subscriptionId, String authHeader) {
     if (subscriptionRepository.findById(subscriptionId).isEmpty()) {
       throw new SubscriptionDoesNotExistException(Constants.SUBSCRIPTION_NOT_FOUND_MESSAGE);

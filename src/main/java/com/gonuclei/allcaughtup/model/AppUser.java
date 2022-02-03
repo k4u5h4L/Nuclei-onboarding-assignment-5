@@ -21,6 +21,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
+/**
+ * AppUser model which is used for authentication
+ */
 @Entity
 @Data
 @NoArgsConstructor
