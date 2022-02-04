@@ -23,18 +23,6 @@ import org.springframework.data.repository.query.QueryLookupStrategy;
 @ComponentScan(basePackages = {"com.gonuclei.allcaughtup.service"})
 public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
-//  @Bean
-//  RestHighLevelClient elasticsearchClient() {
-//    RestHighLevelClient client =
-//        new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
-//    return client;
-//  }
-//
-//  @Bean
-//  ElasticsearchRestTemplate elasticsearchTemplate() {
-//    return new ElasticsearchRestTemplate(elasticsearchClient());
-//  }
-
   @Override
   @Bean
   public RestHighLevelClient elasticsearchClient() {

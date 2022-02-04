@@ -20,4 +20,6 @@ public class Constants {
   final public static String JWT_TOKEN_EXPIRED_MESSAGE = "JWT Token has expired";
   final public static String JWT_DOES_NOT_BEGIN_WITH_MESSAGE =
       "JWT Token does not begin with Bearer String";
+  final public static String KAFKA_TOPIC_NAME = "allcaughtup";
+  final public static String KAFKA_GROUP_NAME = "emaillisteners";
 }

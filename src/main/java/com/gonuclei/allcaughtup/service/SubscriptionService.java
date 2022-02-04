@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
@@ -39,13 +40,15 @@ public class SubscriptionService {
 
   private final JwtTokenUtil jwtTokenUtil;
 
+  private KafkaTemplate<String, String> kafkaTemplate;
+
   /**
    * Function which handles returning all the subscriptions in the database. Also caches the
    * response for future requests
    *
    * @return List of subscriptions in the database
    */
-//  @Cacheable(value = "itemCache")
+  @Cacheable(value = "itemCache")
   public List<Subscription> getAllSubscriptions(String name, String about, double priceLessThan) {
     log.info("Returning list of subscriptions from DB");
 
@@ -212,5 +215,11 @@ public class SubscriptionService {
     subscribedUser.setEndDate(subscribedUser.getEndDate().plus(subscription.getTimePeriod()));
 
     return subscribedUserRepository.save(subscribedUser);
+  }
+
+  public String sendEmail(String message) {
+    kafkaTemplate.send(Constants.KAFKA_TOPIC_NAME, message);
+
+    return "Successfully sent message to Kafka";
   }
 }

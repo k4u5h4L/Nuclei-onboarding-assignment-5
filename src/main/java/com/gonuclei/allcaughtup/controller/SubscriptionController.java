@@ -5,6 +5,7 @@ import com.gonuclei.allcaughtup.model.Subscription;
 import com.gonuclei.allcaughtup.service.SubscriptionService;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "/api/subscription")
 @AllArgsConstructor
+@Slf4j
 public class SubscriptionController {
 
   private final SubscriptionService subscriptionService;
@@ -39,6 +41,7 @@ public class SubscriptionController {
     try {
       priceLessThan = Double.parseDouble(price);
     } catch (NumberFormatException e) {
+      log.error("Invalid value passed as 'price'", e);
       return ResponseEntity.badRequest().body("Only numbers should be passed as 'price'");
     }
 
@@ -54,6 +57,11 @@ public class SubscriptionController {
   @RequestMapping(path = "/add", method = RequestMethod.POST)
   public Subscription saveSubscription(@RequestBody Subscription subscription) {
     return subscriptionService.addSubscription(subscription);
+  }
+
+  @RequestMapping(path = "/sendemail", method = RequestMethod.GET)
+  public String sendEmail(@RequestParam String message) {
+    return subscriptionService.sendEmail(message);
   }
 
   /**
@@ -87,6 +95,7 @@ public class SubscriptionController {
       return ResponseEntity.ok(
           subscriptionService.subscribeUserToSubscription(subscriptionId, authHeader));
     } catch (Exception e) {
+      log.error(e.getMessage(), e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -109,6 +118,7 @@ public class SubscriptionController {
       return ResponseEntity.ok(
           subscriptionService.unsubscribeUserFromSubscription(subscriptionId, authHeader));
     } catch (Exception e) {
+      log.error(e.getMessage(), e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -131,6 +141,7 @@ public class SubscriptionController {
       return ResponseEntity.ok(
           subscriptionService.renewUserSubscription(subscriptionId, authHeader));
     } catch (Exception e) {
+      log.error(e.getMessage(), e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
