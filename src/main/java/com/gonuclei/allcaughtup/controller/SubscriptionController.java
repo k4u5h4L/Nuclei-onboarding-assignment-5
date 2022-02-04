@@ -12,6 +12,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,8 +61,13 @@ public class SubscriptionController {
   }
 
   @RequestMapping(path = "/sendemail", method = RequestMethod.GET)
-  public String sendEmail(@RequestParam String message) {
-    return subscriptionService.sendEmail(message);
+  public ResponseEntity<String> sendEmail(@RequestParam String email) {
+    try {
+      return ResponseEntity.ok(subscriptionService.sendEmail(email));
+    } catch (UsernameNotFoundException e) {
+      log.error(e.getMessage() + email, e);
+      return ResponseEntity.badRequest().body(e.getMessage() + email);
+    }
   }
 
   /**

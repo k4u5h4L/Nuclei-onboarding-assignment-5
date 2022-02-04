@@ -26,8 +26,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
-
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -217,8 +215,8 @@ public class SubscriptionService {
     return subscribedUserRepository.save(subscribedUser);
   }
 
-  public String sendEmail(String message) {
-    kafkaTemplate.send(Constants.KAFKA_TOPIC_NAME, message);
+  public String sendEmail(String email) {
+    kafkaTemplate.send(Constants.KAFKA_TOPIC_NAME, email);
 
     return "Successfully sent message to Kafka";
   }
