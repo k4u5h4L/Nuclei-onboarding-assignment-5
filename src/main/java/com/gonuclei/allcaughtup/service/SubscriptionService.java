@@ -25,6 +25,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -43,12 +45,19 @@ public class SubscriptionService {
    *
    * @return List of subscriptions in the database
    */
-  @Cacheable(value = "itemCache")
-  public List<Subscription> getAllSubscriptions() {
+//  @Cacheable(value = "itemCache")
+  public List<Subscription> getAllSubscriptions(String name, String about, double priceLessThan) {
     log.info("Returning list of subscriptions from DB");
 
     ArrayList<Subscription> result = new ArrayList<>();
-    subscriptionElasticsearchRepository.findAll().forEach(result::add);
+
+    if (name.isBlank() && about.isBlank() && priceLessThan == 0) {
+      subscriptionElasticsearchRepository.findAll().forEach(result::add);
+    } else {
+      result.addAll(
+          subscriptionElasticsearchRepository.findByNameLikeAndAboutLikeAndPriceLessThan(name,
+              about, priceLessThan));
+    }
 
     return result;
   }
@@ -64,8 +73,9 @@ public class SubscriptionService {
   public Subscription addSubscription(Subscription subscription) {
     log.info("Subscription " + subscription.getName() + " is being added to DB and elastic search");
 
-    subscriptionElasticsearchRepository.save(subscription);
-    return subscriptionRepository.save(subscription);
+    Subscription sub = subscriptionRepository.save(subscription);
+    subscriptionElasticsearchRepository.save(sub);
+    return sub;
   }
 
   /**

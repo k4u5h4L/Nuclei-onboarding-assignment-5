@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,8 +31,18 @@ public class SubscriptionController {
    * @return List of subscriptions currently in the database/cache
    */
   @RequestMapping(path = "/all", method = RequestMethod.GET)
-  public List<Subscription> getAllSubscriptions() {
-    return subscriptionService.getAllSubscriptions();
+  public ResponseEntity<?> getAllSubscriptions(@RequestParam(defaultValue = "") String name,
+                                               @RequestParam(defaultValue = "") String about,
+                                               @RequestParam(defaultValue = "0") String price) {
+    double priceLessThan;
+
+    try {
+      priceLessThan = Double.parseDouble(price);
+    } catch (NumberFormatException e) {
+      return ResponseEntity.badRequest().body("Only numbers should be passed as 'price'");
+    }
+
+    return ResponseEntity.ok(subscriptionService.getAllSubscriptions(name, about, priceLessThan));
   }
 
   /**
