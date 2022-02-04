@@ -4,7 +4,7 @@ import com.gonuclei.allcaughtup.constant.Constants;
 import com.gonuclei.allcaughtup.exception.EmailAlreadyExistsException;
 import com.gonuclei.allcaughtup.model.AppUser;
 import com.gonuclei.allcaughtup.model.UserDto;
-import com.gonuclei.allcaughtup.repository.AppUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.AppUserRepository;
 
 import lombok.AllArgsConstructor;
 

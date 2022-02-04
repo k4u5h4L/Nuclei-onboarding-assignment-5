@@ -3,13 +3,13 @@ package com.gonuclei.allcaughtup.util;
 import com.gonuclei.allcaughtup.model.AppUser;
 import com.gonuclei.allcaughtup.model.SubscribedUser;
 import com.gonuclei.allcaughtup.model.Subscription;
-import com.gonuclei.allcaughtup.repository.AppUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscribedUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscriptionRepository;
+import com.gonuclei.allcaughtup.repository.elasticsearch.SubscriptionElasticsearchRepository;
+import com.gonuclei.allcaughtup.repository.jpa.AppUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscribedUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscriptionRepository;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -97,6 +97,16 @@ public class DatabaseSeedUtil {
       log.info("Subscriptions seeded");
     } else {
       log.info("Subscriptions already seeded");
+    }
+  }
+
+  public static void seedElasticsearchSubscriptions(SubscriptionRepository subscriptionRepository,
+                                                    SubscriptionElasticsearchRepository subscriptionElasticsearchRepository) {
+    if (subscriptionElasticsearchRepository.count() == 0) {
+      subscriptionElasticsearchRepository.saveAll(subscriptionRepository.findAll());
+      log.info("Elastic search subscriptions seeded");
+    } else {
+      log.info("Elastic search subscriptions already seeded");
     }
   }
 }

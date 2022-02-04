@@ -10,7 +10,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,17 @@ public class SubscriptionController {
   @RequestMapping(path = "/all", method = RequestMethod.GET)
   public List<Subscription> getAllSubscriptions() {
     return subscriptionService.getAllSubscriptions();
+  }
+
+  /**
+   * Function to add a subscription to the DB and elastic search
+   *
+   * @param subscription Subscription object to be saved
+   * @return The saved subscription
+   */
+  @RequestMapping(path = "/add", method = RequestMethod.POST)
+  public Subscription saveSubscription(@RequestBody Subscription subscription) {
+    return subscriptionService.addSubscription(subscription);
   }
 
   /**
@@ -54,12 +67,17 @@ public class SubscriptionController {
    * @return The subscription which has start and end date
    */
   @RequestMapping(path = "/subscribe/{subscriptionId}", method = RequestMethod.GET)
-  public SubscribedUser subscribeUserToSubscription(HttpServletRequest request,
-                                                    @PathVariable Long subscriptionId) {
+  public ResponseEntity<?> subscribeUserToSubscription(HttpServletRequest request,
+                                                       @PathVariable Long subscriptionId) {
 
     final String authHeader = request.getHeader("Authorization");
 
-    return subscriptionService.subscribeUserToSubscription(subscriptionId, authHeader);
+    try {
+      return ResponseEntity.ok(
+          subscriptionService.subscribeUserToSubscription(subscriptionId, authHeader));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   /**
@@ -71,12 +89,17 @@ public class SubscriptionController {
    * @return The unsubscribed subscription which has start and end date
    */
   @RequestMapping(path = "/cancel/{subscriptionId}", method = RequestMethod.GET)
-  public SubscribedUser unsubscribeUserFromSubscription(HttpServletRequest request,
-                                                        @PathVariable Long subscriptionId) {
+  public ResponseEntity<?> unsubscribeUserFromSubscription(HttpServletRequest request,
+                                                           @PathVariable Long subscriptionId) {
 
     final String authHeader = request.getHeader("Authorization");
 
-    return subscriptionService.unsubscribeUserFromSubscription(subscriptionId, authHeader);
+    try {
+      return ResponseEntity.ok(
+          subscriptionService.unsubscribeUserFromSubscription(subscriptionId, authHeader));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   /**
@@ -88,12 +111,17 @@ public class SubscriptionController {
    * @return The renewed subscription which has start and a new end date
    */
   @RequestMapping(path = "/renew/{subscriptionId}", method = RequestMethod.GET)
-  public SubscribedUser renewUserSubscription(HttpServletRequest request,
-                                              @PathVariable Long subscriptionId) {
+  public ResponseEntity<?> renewUserSubscription(HttpServletRequest request,
+                                                 @PathVariable Long subscriptionId) {
 
     final String authHeader = request.getHeader("Authorization");
 
-    return subscriptionService.renewUserSubscription(subscriptionId, authHeader);
+    try {
+      return ResponseEntity.ok(
+          subscriptionService.renewUserSubscription(subscriptionId, authHeader));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
 }

@@ -7,18 +7,21 @@ import com.gonuclei.allcaughtup.exception.SubscriptionDoesNotExistException;
 import com.gonuclei.allcaughtup.model.AppUser;
 import com.gonuclei.allcaughtup.model.SubscribedUser;
 import com.gonuclei.allcaughtup.model.Subscription;
-import com.gonuclei.allcaughtup.repository.AppUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscribedUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscriptionRepository;
+import com.gonuclei.allcaughtup.repository.elasticsearch.SubscriptionElasticsearchRepository;
+import com.gonuclei.allcaughtup.repository.jpa.AppUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscribedUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscriptionRepository;
 import com.gonuclei.allcaughtup.util.JwtTokenUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,7 @@ public class SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;
   private final SubscribedUserRepository subscribedUserRepository;
   private final AppUserRepository appUserRepository;
+  private final SubscriptionElasticsearchRepository subscriptionElasticsearchRepository;
 
   private final JwtTokenUtil jwtTokenUtil;
 
@@ -44,9 +48,24 @@ public class SubscriptionService {
     log.info("Returning list of subscriptions from DB");
 
     ArrayList<Subscription> result = new ArrayList<>();
-    subscriptionRepository.findAll().forEach(result::add);
+    subscriptionElasticsearchRepository.findAll().forEach(result::add);
 
     return result;
+  }
+
+  /**
+   * Function which handles adding of a new subscription to the database, elastic search and
+   * redis cache
+   *
+   * @param subscription Subscription object to be saved
+   * @return List of subscriptions in the database
+   */
+  @CachePut(value = "itemCache")
+  public Subscription addSubscription(Subscription subscription) {
+    log.info("Subscription " + subscription.getName() + " is being added to DB and elastic search");
+
+    subscriptionElasticsearchRepository.save(subscription);
+    return subscriptionRepository.save(subscription);
   }
 
   /**

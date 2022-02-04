@@ -21,6 +21,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.springframework.data.elasticsearch.annotations.Document;
+
 /**
  * Subscription model which contains all the subscriptions available
  */
@@ -28,6 +30,7 @@ import javax.persistence.OneToMany;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(indexName = "subscriptions")
 @EqualsAndHashCode(exclude = {"subscribedUsers"})
 @ToString(exclude = {"subscribedUsers"})
 public class Subscription implements Serializable {

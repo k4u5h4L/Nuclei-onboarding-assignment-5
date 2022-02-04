@@ -1,7 +1,6 @@
 package com.gonuclei.allcaughtup.controller;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -14,19 +13,16 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import com.gonuclei.allcaughtup.constant.Constants;
 import com.gonuclei.allcaughtup.exception.AuthenticationFailureException;
 import com.gonuclei.allcaughtup.model.AppUser;
-import com.gonuclei.allcaughtup.model.SubscribedUser;
 import com.gonuclei.allcaughtup.model.Subscription;
 import com.gonuclei.allcaughtup.model.UserDto;
-import com.gonuclei.allcaughtup.repository.AppUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscribedUserRepository;
-import com.gonuclei.allcaughtup.repository.SubscriptionRepository;
+import com.gonuclei.allcaughtup.repository.jpa.AppUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscribedUserRepository;
+import com.gonuclei.allcaughtup.repository.jpa.SubscriptionRepository;
 import com.gonuclei.allcaughtup.service.AuthenticationService;
 import com.gonuclei.allcaughtup.service.JwtUserDetailsService;
 import com.gonuclei.allcaughtup.service.SubscriptionService;
 import com.gonuclei.allcaughtup.util.DatabaseSeedUtil;
 import com.gonuclei.allcaughtup.util.JwtTokenUtil;
-
-import reactor.core.publisher.Mono;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SubscriptionControllerTest {
