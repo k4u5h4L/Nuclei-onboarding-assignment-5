@@ -22,4 +22,7 @@ public class Constants {
       "JWT Token does not begin with Bearer String";
   final public static String KAFKA_TOPIC_NAME = "allcaughtup";
   final public static String KAFKA_GROUP_NAME = "emaillisteners";
+  final public static String INTERNAL_SERVER_ERROR = "Internal Server Error";
+  final public static String INVALID_ORDER_MESSAGE =
+      "'order' field should be either 'asc' or 'desc'";
 }

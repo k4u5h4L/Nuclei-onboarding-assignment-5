@@ -1,7 +1,10 @@
 package com.gonuclei.allcaughtup.service;
 
+import static org.elasticsearch.index.query.QueryBuilders.wrapperQuery;
+
 import com.gonuclei.allcaughtup.constant.Constants;
 import com.gonuclei.allcaughtup.exception.AuthenticationFailureException;
+import com.gonuclei.allcaughtup.exception.InvalidOrderException;
 import com.gonuclei.allcaughtup.exception.SubscriptionAlreadyExistsException;
 import com.gonuclei.allcaughtup.exception.SubscriptionDoesNotExistException;
 import com.gonuclei.allcaughtup.model.AppUser;
@@ -17,12 +20,22 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.json.CDL;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +48,7 @@ public class SubscriptionService {
   private final SubscribedUserRepository subscribedUserRepository;
   private final AppUserRepository appUserRepository;
   private final SubscriptionElasticsearchRepository subscriptionElasticsearchRepository;
+  private final ElasticsearchOperations elasticsearchOperations;
 
   private final JwtTokenUtil jwtTokenUtil;
 
@@ -61,6 +75,40 @@ public class SubscriptionService {
     }
 
     return result;
+  }
+
+  /**
+   * FUnction which handles searching og subscriptions using elastic search
+   *
+   * @param query     Elastic search DSL query
+   * @param sortField Field to sort the subscriptions by
+   * @param sortOrder Order to sort the subscriptions in
+   * @return List of Subscriptions matched
+   */
+  public List<Subscription> searchSubscription(String query, String sortField, String sortOrder) {
+    if (!sortOrder.equalsIgnoreCase("asc") && !sortOrder.equalsIgnoreCase("desc")) {
+      throw new InvalidOrderException(Constants.INVALID_ORDER_MESSAGE);
+    }
+
+    Query searchQuery = new NativeSearchQueryBuilder()
+        // with the 'query' part of the request
+        .withQuery(wrapperQuery(query))
+        // with sorting
+        .withSorts(
+            SortBuilders.fieldSort(sortField).order(SortOrder.fromString(sortOrder.toUpperCase())))
+        // build the search query
+        .build();
+    SearchHits<Subscription> hits = elasticsearchOperations.search(searchQuery, Subscription.class);
+
+    ArrayList<Subscription> results = new ArrayList<>();
+
+    for (SearchHit<Subscription> hit : hits) {
+      results.add(hit.getContent());
+    }
+
+    log.info("Returning search results");
+
+    return results;
   }
 
   /**

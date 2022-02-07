@@ -1,5 +1,7 @@
 package com.gonuclei.allcaughtup.controller;
 
+import com.gonuclei.allcaughtup.constant.Constants;
+import com.gonuclei.allcaughtup.model.ErrorResponse;
 import com.gonuclei.allcaughtup.model.SubscribedUser;
 import com.gonuclei.allcaughtup.model.Subscription;
 import com.gonuclei.allcaughtup.service.SubscriptionService;
@@ -9,16 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.elasticsearch.index.query.QueryBuilders.wrapperQuery;
-
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.RestStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriptionController {
 
   private final SubscriptionService subscriptionService;
-  private final ElasticsearchOperations elasticsearchOperations;
 
   /**
    * Function to handle response of all the subscriptions in the database/cache
@@ -58,20 +54,25 @@ public class SubscriptionController {
     return ResponseEntity.ok(subscriptionService.getAllSubscriptions(name, about, priceLessThan));
   }
 
+  /**
+   * Function to handle the search queries from the client written in DSL
+   *
+   * @param query     elastic search DSL query
+   * @param sortField Field to sort the subscriptions by
+   * @param sortOrder Order to sort the subscriptions in
+   * @return List of Subscription objects resulting from the query
+   */
   @RequestMapping(path = "/all", method = RequestMethod.POST)
-  public ResponseEntity<List<Subscription>> searchSubscriptions(@RequestBody String query) {
-    Query searchQuery = new NativeSearchQueryBuilder().withQuery(wrapperQuery(query)).build();
-    SearchHits<Subscription> hits = elasticsearchOperations.search(searchQuery, Subscription.class);
-
-    ArrayList<Subscription> results = new ArrayList<>();
-
-    for (SearchHit<Subscription> hit : hits) {
-      results.add(hit.getContent());
+  public ResponseEntity<?> searchAllSubscriptions(
+      @RequestParam(defaultValue = "id") String sortField,
+      @RequestParam(defaultValue = "asc") String sortOrder, @RequestBody String query) {
+    try {
+      return ResponseEntity.ok(subscriptionService.searchSubscription(query, sortField, sortOrder));
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return ResponseEntity.internalServerError()
+          .body(new ErrorResponse(500, Constants.INTERNAL_SERVER_ERROR, e.getMessage()));
     }
-
-    log.info("Returning search results");
-
-    return ResponseEntity.ok(results);
   }
 
   /**
