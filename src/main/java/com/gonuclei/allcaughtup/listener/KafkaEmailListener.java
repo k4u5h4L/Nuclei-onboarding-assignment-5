@@ -10,7 +10,9 @@ import com.gonuclei.allcaughtup.repository.jpa.SubscribedUserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Period;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,14 +49,36 @@ public class KafkaEmailListener {
     AppUser user = appUserRepository.findByEmail(email).get();
 
     if (subscribedUserRepository.findAllByUserId(user.getId()).isPresent()) {
-      SubscribedUser sc = subscribedUserRepository.findAllByUserId(user.getId()).get().get(0);
+      List<SubscribedUser> subscribedUsers =
+          subscribedUserRepository.findAllByUserId(user.getId()).get();
 
       SimpleMailMessage message = new SimpleMailMessage();
+
+      StringBuilder content = new StringBuilder();
+
+      content.append("Here's your newsletter:\n\n\n");
+
+      for (SubscribedUser sc : subscribedUsers) {
+        Period timePeriod = sc.getSubscription().getTimePeriod();
+        content
+            // Specify name
+            .append("For ").append(sc.getSubscription().getName()).append(",\n\n")
+            // Specify about
+            .append(sc.getSubscription().getAbout()).append("\n\n")
+            // Specify price
+            .append("You're paying ").append(sc.getSubscription().getPrice())
+            // Specify time period
+            .append(" for every ").append(timePeriod.getDays()).append(" Days, ")
+            .append(timePeriod.getMonths()).append(" Months, ").append(timePeriod.getYears())
+            .append(" Years\n\n\n\n\n");
+      }
+
+      content.append("Sincerely,\n\nFrom the AllCaughtUp team");
 
       message.setFrom(mailUsername);
       message.setTo(email);
       message.setSubject("Subscription that you had subscribed to");
-      message.setText(sc.getSubscription().getName() + "\n\n\n" + sc.getSubscription().getAbout());
+      message.setText(content.toString());
       emailSender.send(message);
 
       log.info("Email successfully sent to email: " + email);
