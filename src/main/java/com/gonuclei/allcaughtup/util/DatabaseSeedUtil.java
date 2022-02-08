@@ -39,12 +39,23 @@ public class DatabaseSeedUtil {
         "A " + "movie streaming service billed every year");
     Subscription disney = new Subscription(250.00, Period.of(0, 1, 0), "Disney +",
         "A movie streaming service billed every month");
+
     if (subscriptionRepository.count() == 0) {
       subscriptionRepository.save(netflix);
 
       subscriptionRepository.save(prime);
 
       subscriptionRepository.save(disney);
+
+      subscriptionRepository.save(
+          new Subscription(500.00, Period.of(0, 3, 0), "Prime", "A TV streaming service"));
+
+      subscriptionRepository.save(
+          new Subscription(550.00, Period.of(0, 1, 0), "1Prime", "A cartoon streaming service"));
+
+      subscriptionRepository.save(new Subscription(450.00, Period.of(1, 1, 0), "Prime India",
+          "An Indian TV streaming service"));
+
     } else {
       log.info("Subscriptions already seeded");
     }
@@ -100,9 +111,17 @@ public class DatabaseSeedUtil {
     }
   }
 
+  /**
+   * Seed Elastic search subscription index from the DB
+   *
+   * @param subscriptionRepository              SubscriptionRepository of the DB
+   * @param subscriptionElasticsearchRepository SubscriptionElasticsearchRepository of Elastic
+   *                                            search
+   */
   public static void seedElasticsearchSubscriptions(SubscriptionRepository subscriptionRepository,
                                                     SubscriptionElasticsearchRepository subscriptionElasticsearchRepository) {
-    if (subscriptionElasticsearchRepository.count() == 0) {
+    if (subscriptionElasticsearchRepository.count() != subscriptionRepository.count()) {
+      subscriptionElasticsearchRepository.deleteAll();
       subscriptionElasticsearchRepository.saveAll(subscriptionRepository.findAll());
       log.info("Elastic search subscriptions seeded");
     } else {

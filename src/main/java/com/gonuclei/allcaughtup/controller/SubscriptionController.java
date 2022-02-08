@@ -64,8 +64,8 @@ public class SubscriptionController {
    */
   @RequestMapping(path = "/all", method = RequestMethod.POST)
   public ResponseEntity<?> searchAllSubscriptions(
-      @RequestParam(defaultValue = "id") String sortField,
-      @RequestParam(defaultValue = "asc") String sortOrder, @RequestBody String query) {
+      @RequestParam(defaultValue = "_score") String sortField,
+      @RequestParam(defaultValue = "desc") String sortOrder, @RequestBody String query) {
     try {
       return ResponseEntity.ok(subscriptionService.searchSubscription(query, sortField, sortOrder));
     } catch (Exception e) {
